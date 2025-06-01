@@ -1,10 +1,14 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using DigitalWallet.Application.Decorators;
+using DigitalWallet.Application.Interfaces;
 using DigitalWallet.Application.UseCases.Users;
+using DigitalWallet.Application.Validators.Identity;
 using DigitalWallet.CrossCutting.Options;
 using DigitalWallet.Domain.Interfaces.UnitOfWork;
 using DigitalWallet.Infrastructure.Context;
 using DigitalWallet.Infrastructure.Interceptors;
 using DigitalWallet.Infrastructure.Repositories;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -103,11 +107,20 @@ namespace DigitalWallet.API.Extensions
         public static IServiceCollection AddUseCases(this IServiceCollection services)
         {
             services.Scan(scan =>
-                scan.FromAssemblyOf<CreateUserUseCase>()
-                    .AddClasses(classes => classes.Where(c => c.Name.EndsWith("UseCase")))
-                    .AsSelf()
+                scan.FromAssemblyOf<LoginRequestValidator>()
+                    .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)))
+                    .AsSelfWithInterfaces()
                     .WithScopedLifetime()
             );
+
+            services.Scan(scan =>
+                scan.FromAssemblyOf<CreateUserUseCase>()
+                    .AddClasses(classes => classes.AssignableTo(typeof(IUseCase<,>)))
+                    .AsSelfWithInterfaces()
+                    .WithScopedLifetime()
+            );
+
+            services.Decorate(typeof(IUseCase<,>), typeof(ValidationUseCaseDecorator<,>));
 
             return services;
         }

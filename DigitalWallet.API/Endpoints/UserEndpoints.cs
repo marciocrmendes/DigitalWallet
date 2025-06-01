@@ -1,4 +1,6 @@
+using DigitalWallet.Application.Interfaces;
 using DigitalWallet.Application.UseCases.Users;
+using DigitalWallet.CrossCutting.Validation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalWallet.API.Endpoints;
@@ -53,7 +55,7 @@ public static class UserEndpoints
 
     private static async Task<IResult> CreateUser(
         CreateUserUseCase.Request request,
-        CreateUserUseCase createUserUseCase
+        IUseCase<CreateUserUseCase.Request, Result<CreateUserUseCase.Response>> createUserUseCase
     )
     {
         var result = await createUserUseCase.ExecuteAsync(request);
@@ -68,7 +70,7 @@ public static class UserEndpoints
 
     private static async Task<IResult> GetUserById(
         Guid userId,
-        GetUserByIdUseCase getUserByIdUseCase
+        IUseCase<GetUserByIdUseCase.Request, Result<GetUserByIdUseCase.Response>> getUserByIdUseCase
     )
     {
         var result = await getUserByIdUseCase.ExecuteAsync(new GetUserByIdUseCase.Request(userId));
@@ -81,7 +83,10 @@ public static class UserEndpoints
         return Results.Ok(result.Value);
     }
 
-    private static async Task<IResult> GetUserWallets(Guid userId, GetUserWalletsUseCase useCase)
+    private static async Task<IResult> GetUserWallets(
+        Guid userId,
+        IUseCase<GetUserWalletsUseCase.Request, Result<GetUserWalletsUseCase.Response>> useCase
+    )
     {
         var result = await useCase.ExecuteAsync(new GetUserWalletsUseCase.Request(userId));
 
@@ -95,7 +100,10 @@ public static class UserEndpoints
 
     private static async Task<IResult> GetUserTransactions(
         Guid userId,
-        GetUserTransactionsUseCase useCase,
+        IUseCase<
+            GetUserTransactionsUseCase.Request,
+            Result<GetUserTransactionsUseCase.Response>
+        > useCase,
         DateTime? startDate = null,
         DateTime? endDate = null
     )

@@ -16,4 +16,9 @@
     <ProjectReference Include="..\DigitalWallet.CrossCutting\DigitalWallet.CrossCutting.csproj" />
     <ProjectReference Include="..\DigitalWallet.Domain\DigitalWallet.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Validators\Identity\" />
+    <Folder Include="Validators\Users\" />
+    <Folder Include="Validators\Wallets\" />
+  </ItemGroup>
 </Project>

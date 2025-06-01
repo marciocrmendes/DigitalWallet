@@ -1,4 +1,4 @@
-﻿using DigitalWallet.Application.UseCases.Identity;
+using DigitalWallet.Application.Interfaces;
 using DigitalWallet.CrossCutting.Validation;
 using Microsoft.AspNetCore.Mvc;
 using static DigitalWallet.Application.UseCases.Identity.LoginUseCase;
@@ -27,7 +27,10 @@ namespace DigitalWallet.API.Endpoints
             return endpoints;
         }
 
-        private static async Task<IResult> Auth(Request request, LoginUseCase loginUseCase)
+        private static async Task<IResult> Auth(
+            Request request,
+            IUseCase<Request, Result<Response>> loginUseCase
+        )
         {
             var result = await loginUseCase.ExecuteAsync(request);
 
