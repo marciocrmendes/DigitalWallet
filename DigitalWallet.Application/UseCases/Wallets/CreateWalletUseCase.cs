@@ -27,27 +27,6 @@ public class CreateWalletUseCase(IWalletRepository walletRepository, IUserReposi
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
-        // Validate User ID
-        if (request.UserId == Guid.Empty)
-        {
-            return Result<Response>.Failure(Wallet.ValidationError.InvalidUserId());
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return Result<Response>.Failure(Wallet.ValidationError.InvalidWalletName());
-        }
-
-        if (request.Name.Length > 200)
-        {
-            return Result<Response>.Failure(Wallet.ValidationError.InvalidWalletName());
-        }
-
-        if (!string.IsNullOrEmpty(request.Description) && request.Description.Length > 500)
-        {
-            return Result<Response>.Failure(Wallet.ValidationError.InvalidDescription());
-        }
-
         var user = await userRepository.GetByIdAsync(request.UserId);
         if (user == null)
         {
