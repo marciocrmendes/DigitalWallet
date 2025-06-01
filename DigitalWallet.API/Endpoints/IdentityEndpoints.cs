@@ -11,7 +11,7 @@ namespace DigitalWallet.API.Endpoints
             this IEndpointRouteBuilder endpoints
         )
         {
-            var group = endpoints.MapGroup("/api/identity").AllowAnonymous().WithTags("Auth");
+            var group = endpoints.MapGroup("/identity").AllowAnonymous().WithTags("Auth");
 
             group
                 .MapPost("/", Auth)

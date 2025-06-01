@@ -45,17 +45,18 @@ O projeto está estruturado seguindo os princípios de Clean Architecture, divid
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **.NET 9** - Framework principal
-- **ASP.NET Core** - Web API
-- **Entity Framework Core** - ORM
-- **PostgreSQL** - Banco de dados
-- **JWT Bearer** - Autenticação
-- **ASP.NET Core Identity** - Gestão de usuários
-- **Swagger/OpenAPI** - Documentação da API
-- **FluentValidation** - Validação de dados
-- **AutoFixture** - Testes unitários
-- **xUnit** - Framework de testes
-- **Docker** - Containerização
+- **.NET 9** - Framework principal (versão mais recente)
+- **ASP.NET Core Minimal APIs** - Web API moderna e performática
+- **Entity Framework Core 9** - ORM com suporte a interceptors e tracking avançado
+- **PostgreSQL 15** - Banco de dados relacional
+- **JWT Bearer** - Autenticação segura de APIs
+- **ASP.NET Core Identity** - Gestão completa de usuários e autenticação
+- **Swagger/OpenAPI** - Documentação interativa da API
+- **FluentValidation** - Validação robusta de dados
+- **Decorator Pattern** - Para implementação de cross-cutting concerns
+- **AutoFixture** - Geração automática de dados para testes
+- **xUnit** - Framework de testes com suporte a teoria de dados
+- **Docker & Docker Compose** - Containerização e orquestração de serviços
 
 ## 📋 Pré-requisitos
 
@@ -200,7 +201,7 @@ Authorization: Bearer {seu_token_jwt}
 
 ```bash
 # 1. Criar usuário
-curl -X POST "http://localhost:8080/digital-wallet/api/v1/users" \
+curl -X POST "http://localhost:8080/api/v1/users" \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "João",
@@ -210,7 +211,7 @@ curl -X POST "http://localhost:8080/digital-wallet/api/v1/users" \
   }'
 
 # 2. Fazer login
-curl -X POST "http://localhost:8080/digital-wallet/api/identity" \
+curl -X POST "http://localhost:8080/api/v1/identity" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "joao@exemplo.com",
@@ -218,7 +219,7 @@ curl -X POST "http://localhost:8080/digital-wallet/api/identity" \
   }'
 
 # 3. Criar carteira (usando o token recebido)
-curl -X POST "http://localhost:8080/digital-wallet/api/v1/wallets" \
+curl -X POST "http://localhost:8080/api/v1/wallets" \
   -H "Authorization: Bearer {TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -229,7 +230,7 @@ curl -X POST "http://localhost:8080/digital-wallet/api/v1/wallets" \
   }'
 
 # 4. Adicionar saldo
-curl -X POST "http://localhost:8080/digital-wallet/api/v1/wallets/{WALLET_ID}/balance" \
+curl -X POST "http://localhost:8080/api/v1/wallets/{WALLET_ID}/balance" \
   -H "Authorization: Bearer {TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -245,7 +246,6 @@ curl -X POST "http://localhost:8080/digital-wallet/api/v1/wallets/{WALLET_ID}/ba
 - **Users** - Dados dos usuários
 - **Wallets** - Carteiras digitais
 - **Transactions** - Histórico de transações
-- **Roles** - Perfis de usuário (Identity)
 
 ### Relacionamentos
 
@@ -272,28 +272,57 @@ dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
 ```
 DigitalWallet/
 ├── DigitalWallet.API/
-│   ├── Endpoints/              # Minimal APIs endpoints
-│   ├── Extensions/             # Extensões e DI
-│   ├── Configurations/         # Configurações da API
-│   └── Program.cs             # Ponto de entrada
+│   ├── Endpoints/              # Definições de Minimal APIs endpoints
+│   ├── Extensions/             # Extensões para configuração de serviços 
+│   ├── Configurations/         # Configurações específicas da API
+│   └── Program.cs              # Ponto de entrada da aplicação
 ├── DigitalWallet.Application/
-│   ├── UseCases/              # Casos de uso da aplicação
-│   ├── DTOs/                  # Data Transfer Objects
-│   ├── Interfaces/            # Contratos da aplicação
-│   └── Extensions/            # Extensões da aplicação
+│   ├── UseCases/               # Implementação dos casos de uso
+│   │   ├── Users/              # Operações relacionadas a usuários
+│   │   ├── Wallets/            # Operações relacionadas a carteiras
+│   │   └── Transactions/       # Operações relacionadas a transações  
+│   ├── DTOs/                   # Data Transfer Objects
+│   │   ├── Requests/           # DTOs para requisições
+│   │   └── Responses/          # DTOs para respostas
+│   ├── Interfaces/             # Contratos de serviços e repositórios
+│   ├── Decorators/             # Implementações de padrão Decorator
+│   ├── Providers/              # Provedores de serviços externos
+│   ├── Validators/             # Validadores com FluentValidation
+│   └── Extensions/             # Extensões de métodos utilitários
 ├── DigitalWallet.Domain/
-│   ├── Entities/              # Entidades do domínio
-│   ├── ValueObjects/          # Objetos de valor
-│   └── Interfaces/            # Contratos do domínio
+│   ├── Entities/               # Entidades do domínio
+│   │   ├── User.cs             # Entidade de usuário
+│   │   ├── Wallet.cs           # Entidade de carteira
+│   │   └── Transaction.cs      # Entidade de transação
+│   ├── ValueObjects/           # Objetos de valor imutáveis
+│   │   ├── Money.cs            # Value Object para valores monetários
+│   │   └── Email.cs            # Value Object para e-mails
+│   └── Interfaces/             # Contratos do domínio
 ├── DigitalWallet.Infrastructure/
-│   ├── Context/               # DbContext
-│   ├── Repositories/          # Implementação dos repositórios
-│   ├── Migrations/            # Migrations do EF Core
-│   └── Extensions/            # Configurações de infraestrutura
+│   ├── Context/                # DbContext e configuração do EF Core
+│   ├── Repositories/           # Implementações dos repositórios
+│   │   ├── BaseRepository.cs   # Repositório base genérico
+│   │   └── Específicos/        # Repositórios específicos por entidade
+│   ├── Migrations/             # Migrations do Entity Framework Core
+│   ├── Interceptors/           # Interceptors para auditoria e modificação
+│   ├── Seeders/                # Classes para popular dados iniciais
+│   ├── Mappers/                # Mapeamentos entre entidades e modelos
+│   ├── Services/               # Implementações de serviços externos
+│   └── Extensions/             # Extensões de infraestrutura
 └── DigitalWallet.CrossCutting/
-    ├── Enums/                 # Enumeradores
-    ├── Validation/            # Validações customizadas
-    └── Extensions/            # Extensões utilitárias
+    ├── Auditory/               # Componentes de auditoria
+    ├── Enums/                  # Enumeradores globais
+    ├── Options/                # Classes de configuração para IOptions
+    ├── Validation/             # Validações customizadas
+    └── AppUser.cs              # Modelo de usuário da aplicação
+├── Tests/
+    └── DigitalWallet.UnitTests/
+        ├── Domain/              # Testes para o domínio
+        │   ├── Entities/        # Testes para entidades
+        │   └── ValueObjects/    # Testes para objetos de valor
+        ├── Application/         # Testes para camada de aplicação
+        │   └── UseCases/        # Testes para casos de uso
+        └── Fixtures/            # Classes de suporte a testes
 ```
 
 ## 🔧 Configurações

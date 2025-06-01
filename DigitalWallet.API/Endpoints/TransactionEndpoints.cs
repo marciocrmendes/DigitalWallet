@@ -1,4 +1,4 @@
-﻿using DigitalWallet.Application.UseCases.Wallets;
+using DigitalWallet.Application.UseCases.Wallets;
 
 namespace DigitalWallet.API.Endpoints
 {
@@ -8,10 +8,7 @@ namespace DigitalWallet.API.Endpoints
             this IEndpointRouteBuilder endpoints
         )
         {
-            var group = endpoints
-                .MapGroup("/transaction")
-                .RequireAuthorization()
-                .WithTags("Transaction");
+            var group = endpoints.MapGroup("/transaction").RequireAuthorization().WithTags("Transaction");
 
             group
                 .MapPost("/transfer", CreateTransfer)
